@@ -4,18 +4,16 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"os"
-
-	"github.com/joho/godotenv"
 	application "github.com/lulzshadowwalker/green-backend/internal/http/app"
 )
 
 func main() {
   //  TODO: Use a config package 
-	if err := godotenv.Load(".env.local"); err != nil {
-		slog.Error("failed to load .env.local", "err", err)
-		os.Exit(1)
-	}
+  //  FIXME: Instead of using a .env file, we need to supply env variables to the docker container
+	// if err := godotenv.Load(".env.local"); err != nil {
+	// 	slog.Error("failed to load .env.local", "err", err)
+	// 	os.Exit(1)
+	// }
 
 	app, err := application.New()
 	if err != nil {

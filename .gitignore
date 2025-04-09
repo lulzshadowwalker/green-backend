@@ -60,3 +60,6 @@ Temporary Items
 
 .env.*
 !.env.example
+
+Todo.md
+Changelog.md
