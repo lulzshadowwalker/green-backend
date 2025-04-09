@@ -2,14 +2,15 @@ package main
 
 import (
 	"errors"
+	application "github.com/lulzshadowwalker/green-backend/internal/http/app"
+	_ "github.com/lulzshadowwalker/green-backend/internal/logging"
 	"log/slog"
 	"net/http"
-	application "github.com/lulzshadowwalker/green-backend/internal/http/app"
 )
 
 func main() {
-  //  TODO: Use a config package 
-  //  FIXME: Instead of using a .env file, we need to supply env variables to the docker container
+	//  TODO: Use a config package
+	//  FIXME: Instead of using a .env file, we need to supply env variables to the docker container
 	// if err := godotenv.Load(".env.local"); err != nil {
 	// 	slog.Error("failed to load .env.local", "err", err)
 	// 	os.Exit(1)
@@ -21,7 +22,7 @@ func main() {
 		return
 	}
 
-	app.Echo.Logger.Info("server started", "addr", app.Addr(), "timeout", app.Timeout())
+	//	slog.Info("server started", "addr", app.Addr(), "timeout", app.Timeout())
 	if err := app.Start(); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("server shutdown", "err", err)

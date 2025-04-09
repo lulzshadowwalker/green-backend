@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"os"
 	"regexp"
 	"time"
 
@@ -55,7 +54,7 @@ func New(opts ...AppOption) (*App, error) {
 	e.HTTPErrorHandler = greenHTTPErrorHandler
 
   //  TODO: middleware.Logger(app))
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := slog.Default()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus: true,
 		LogURI:    true,
