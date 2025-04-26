@@ -3,3 +3,14 @@
 //   sqlc v1.27.0
 
 package db
+
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type SensorReading struct {
+	ID         int64
+	SensorType string
+	Value      float64
+	Timestamp  pgtype.Timestamptz
+}

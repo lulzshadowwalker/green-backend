@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	application "github.com/lulzshadowwalker/green-backend/internal/http/app"
 	_ "github.com/lulzshadowwalker/green-backend/internal/logging"
 	"github.com/lulzshadowwalker/green-backend/internal/psql"
-	"github.com/lulzshadowwalker/green-backend/internal/psql/db"
 )
 
 func main() {
@@ -27,15 +25,6 @@ func main() {
 		slog.Error("failed to connect to database", "err", err)
 		os.Exit(1)
 	}
-
-  q := db.New(pool)
-  hello, err := q.GetHello(context.Background())
-  if err != nil {
-    slog.Error("failed to get hello", "err", err)
-    os.Exit(1)
-  }
-
-  slog.Info("hello", "value", hello)
 
 	app, err := application.New(application.WithDB(pool))
 	if err != nil {

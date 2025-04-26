@@ -12,7 +12,7 @@ services:
     environment:
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_USER=postgres
+      - DB_USERNAME=postgres
       - DB_PASSWORD=example
       - DB_NAME=mydb
     depends_on:
@@ -45,39 +45,39 @@ services:
     networks:
       - backend
 
-      #loki:
-      #  image: grafana/loki:2.9.3
-      #  volumes:
-      #    - ~/dev/docker-volumes/loki:/etc/loki
-      #  ports:
-      #    - "3100:3100"
-      #  restart: unless-stopped
-      #  command: -config.file=/etc/loki/loki-config.yml
-      #  networks:
-      #    - loki
+  loki:
+    image: grafana/loki:2.9.3
+    volumes:
+      - ~/dev/docker-volumes/loki:/etc/loki
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    networks:
+      - loki
 
-      #promtail:
-      #  image: grafana/promtail:2.4.0
-      #  volumes:
-      #    - /var/log:/var/log
-      #    - ~/dev/docker-volumes/promtail:/etc/promtail
-      #  # ports:
-      #  #   - "1514:1514" # this is only needed if you are going to send syslogs
-      #  restart: unless-stopped
-      #  command: -config.file=/etc/promtail/promtail-config.yml
-      #  networks:
-      #    - loki
+  promtail:
+    image: grafana/promtail:2.4.0
+    volumes:
+      - /var/log:/var/log
+      - ~/dev/docker-volumes/promtail:/etc/promtail
+    # ports:
+    #   - "1514:1514" # this is only needed if you are going to send syslogs
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yml
+    networks:
+      - loki
 
-      #grafana:
-      #  image: grafana/grafana:latest
-      #  user: "501"
-      #  volumes:
-      #    - ~/dev/docker-volumes/grafana:/var/lib/grafana
-      #  ports:
-      #    - "3000:3000"
-      #  restart: unless-stopped
-      #  networks:
-      #    - loki
+  grafana:
+    image: grafana/grafana:latest
+    user: "501"
+    volumes:
+      - ~/dev/docker-volumes/grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - loki
 
 volumes:
   postgres_data:

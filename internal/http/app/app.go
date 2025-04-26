@@ -10,6 +10,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/lulzshadowwalker/green-backend/internal/http/handler"
+	"github.com/lulzshadowwalker/green-backend/internal/psql/db"
+	"github.com/lulzshadowwalker/green-backend/internal/psql/stores"
+	"github.com/lulzshadowwalker/green-backend/internal/service"
 )
 
 const (
@@ -46,9 +50,10 @@ func New(opts ...AppOption) (*App, error) {
 		return nil, errors.New("db cannot be nil")
 	}
 
-	if err := registerRoutes(app); err != nil {
-		return nil, err
-	}
+  r := stores.NewSensorReadings(db.New(app.db))
+	s := service.NewSensorReadings(r)
+	h := handler.NewSensorReadings(s)
+	h.RegisterRoutes(app.Echo)
 
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
