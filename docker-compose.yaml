@@ -1,39 +1,83 @@
-version: "3"
+version: "3.8"
+
 networks:
   loki:
+  backend:
+
 services:
   app:
     build: .
     ports:
       - "8080:8080"
-  loki:
-    image: grafana/loki:2.9.3
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=example
+      - DB_NAME=mydb
+    depends_on:
+      - db
+    networks:
+      - backend
+      - loki
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: mydb
     volumes:
-      - ~/dev/docker-volumes/loki:/etc/loki
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "3100:3100"
-    restart: unless-stopped
-    command: -config.file=/etc/loki/loki-config.yml
+      - "5432:5432"
     networks:
-      - loki
-  promtail:
-    image: grafana/promtail:2.4.0
-    volumes:
-      - /var/log:/var/log
-      - ~/dev/docker-volumes/promtail:/etc/promtail
-    # ports:
-    #   - "1514:1514" # this is only needed if you are going to send syslogs
+      - backend
+
+  adminer:
+    image: adminer:latest
     restart: unless-stopped
-    command: -config.file=/etc/promtail/promtail-config.yml
-    networks:
-      - loki
-  grafana:
-    image: grafana/grafana:latest
-    user: "501"
-    volumes:
-    - ~/dev/docker-volumes/grafana:/var/lib/grafana
     ports:
-      - "3000:3000"
-    restart: unless-stopped
+      - "8081:8080"
+    depends_on:
+      - db
     networks:
-      - loki
+      - backend
+
+      #loki:
+      #  image: grafana/loki:2.9.3
+      #  volumes:
+      #    - ~/dev/docker-volumes/loki:/etc/loki
+      #  ports:
+      #    - "3100:3100"
+      #  restart: unless-stopped
+      #  command: -config.file=/etc/loki/loki-config.yml
+      #  networks:
+      #    - loki
+
+      #promtail:
+      #  image: grafana/promtail:2.4.0
+      #  volumes:
+      #    - /var/log:/var/log
+      #    - ~/dev/docker-volumes/promtail:/etc/promtail
+      #  # ports:
+      #  #   - "1514:1514" # this is only needed if you are going to send syslogs
+      #  restart: unless-stopped
+      #  command: -config.file=/etc/promtail/promtail-config.yml
+      #  networks:
+      #    - loki
+
+      #grafana:
+      #  image: grafana/grafana:latest
+      #  user: "501"
+      #  volumes:
+      #    - ~/dev/docker-volumes/grafana:/var/lib/grafana
+      #  ports:
+      #    - "3000:3000"
+      #  restart: unless-stopped
+      #  networks:
+      #    - loki
+
+volumes:
+  postgres_data:

@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -21,6 +22,7 @@ type App struct {
 	Echo    *echo.Echo
 	addr    string
 	timeout time.Duration
+	db      *pgxpool.Pool
 }
 
 type AppOption func(*App) error
@@ -40,9 +42,13 @@ func New(opts ...AppOption) (*App, error) {
 		}
 	}
 
-   if err := registerRoutes(app); err != nil {
-     return nil, err
-   }
+	if app.db == nil {
+		return nil, errors.New("db cannot be nil")
+	}
+
+	if err := registerRoutes(app); err != nil {
+		return nil, err
+	}
 
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
@@ -53,7 +59,7 @@ func New(opts ...AppOption) (*App, error) {
 
 	e.HTTPErrorHandler = greenHTTPErrorHandler
 
-  //  TODO: middleware.Logger(app))
+	//  TODO: middleware.Logger(app))
 	logger := slog.Default()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus: true,
@@ -113,7 +119,7 @@ func WithTimeout(d time.Duration) AppOption {
 }
 
 func (a *App) Close() {
-  //  TODO: cleanup database resources and whatnot
+	//  TODO: cleanup database resources and whatnot
 }
 
 func (a *App) Addr() string {
@@ -122,4 +128,11 @@ func (a *App) Addr() string {
 
 func (a *App) Timeout() time.Duration {
 	return a.timeout
+}
+
+func WithDB(db *pgxpool.Pool) AppOption {
+	return func(a *App) error {
+		a.db = db
+		return nil
+	}
 }
