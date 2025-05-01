@@ -36,12 +36,12 @@ func (sr *SensorReadings) Index(c echo.Context) error {
 }
 
 type CreateSensorReadingRequest struct {
-	Data struct {
+	Data []struct {
 		Attributes struct {
 			SensorType string  `json:"sensorType" validate:"required,oneof=temperature humidity"`
 			Value      float64 `json:"value" validate:"required"`
-		} `json:"attributes"`
-	} `json:"data"`
+		} `json:"attributes" validate:"required,dive"`
+	} `json:"data" validate:"required,dive"`
 }
 
 func (sr *SensorReadings) Create(c echo.Context) error {
@@ -51,19 +51,25 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 	}
 
 	if err := c.Validate(req); err != nil {
-		return err 
-	}
-
-	attr := req.Data.Attributes
-	m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
-		SensorType: attr.SensorType,
-		Value:      attr.Value,
-	})
-	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, sr.resource(m))
+	//  TODO: Move this into the service class with a transaction
+	readings := make([]internal.SensorReading, len(req.Data))
+	for idx, val := range req.Data {
+		attr := val.Attributes
+		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
+			SensorType: attr.SensorType,
+			Value:      attr.Value,
+		})
+		if err != nil {
+			return err
+		}
+
+		readings[idx] = m
+	}
+
+	return c.JSON(http.StatusOK, sr.collection(readings))
 }
 
 func (sr *SensorReadings) resource(r internal.SensorReading) echo.Map {
