@@ -50,10 +50,12 @@ func New(opts ...AppOption) (*App, error) {
 		return nil, errors.New("db cannot be nil")
 	}
 
-  r := stores.NewSensorReadings(db.New(app.db))
+	r := stores.NewSensorReadings(db.New(app.db))
 	s := service.NewSensorReadings(r)
 	h := handler.NewSensorReadings(s)
 	h.RegisterRoutes(app.Echo)
+
+	handler.NewHealthHandler().RegisterRoutes(app.Echo)
 
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
