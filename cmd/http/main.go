@@ -14,19 +14,12 @@ import (
 func main() {
 	//  TODO: Use a config package
 	pool, err := psql.Connect(psql.ConnectionParams{
-		// 	Host:     os.Getenv("DB_HOST"),
-		// 	Port:     os.Getenv("DB_PORT"),
-		// 	Username: os.Getenv("DB_USERNAME"),
-		// 	Password: os.Getenv("DB_PASSWORD"),
-		// 	Name:     os.Getenv("DB_NAME"),
-		// 	SSLMode:  os.Getenv("DB_SSLMODE"),
-
-		Host:     "localhost",
-		Port:     "5432",
-		Username: "postgres",
-		Password: "example",
-		Name:     "mydb",
-		SSLMode:  "disable",
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Username: os.Getenv("DB_USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Name:     os.Getenv("DB_NAME"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
 	})
 	if err != nil {
 		slog.Error("failed to connect to database", "err", err)
