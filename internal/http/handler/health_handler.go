@@ -17,6 +17,7 @@ func NewHealthHandler() *HealthHandler {
 func (hh *HealthHandler) RegisterRoutes(e *echo.Echo) {
 	e.GET("/api/health", hh.healthCheck)
 	e.HEAD("/api/health", hh.healthCheck)
+	e.HEAD("/api/hello", hh.healthCheck)
 }
 
 func (hh *HealthHandler) healthCheck(c echo.Context) error {

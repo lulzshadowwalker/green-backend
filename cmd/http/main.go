@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	//  TODO: Use a config package
 	pool, err := psql.Connect(psql.ConnectionParams{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
