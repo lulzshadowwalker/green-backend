@@ -1,6 +1,7 @@
 services:
   app:
-    image: ghcr.io/lulzshadowwalker/green:prod
+    # image: ghcr.io/lulzshadowwalker/green:prod
+    build: .
     environment:
       - DB_HOST=db
       - DB_PORT=5432

@@ -36,12 +36,11 @@ func (sr *SensorReadings) Index(c echo.Context) error {
 }
 
 type CreateSensorReadingRequest struct {
-	Data []struct {
-		Attributes struct {
-			SensorType string  `json:"sensorType" validate:"required,oneof=temperature humidity"`
-			Value      float64 `json:"value" validate:"required"`
-		} `json:"attributes" validate:"required,dive"`
-	} `json:"data" validate:"required,dive"`
+	Temperature  float64 `json:"temperature" validate:"number"`
+	Humidity     float64 `json:"humidity" validate:"number"`
+	LightLevel   float64 `json:"lightLevel" validate:"number"`
+	WaterLevel   float64 `json:"waterLevel" validate:"number"`
+	SoilMoisture float64 `json:"soilMoisture" validate:"number"`
 }
 
 func (sr *SensorReadings) Create(c echo.Context) error {
@@ -55,18 +54,66 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 	}
 
 	//  TODO: Move this into the service class with a transaction
-	readings := make([]internal.SensorReading, len(req.Data))
-	for idx, val := range req.Data {
-		attr := val.Attributes
+	readings := make([]internal.SensorReading, 0)
+
+	if req.Temperature != 0 {
 		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
-			SensorType: attr.SensorType,
-			Value:      attr.Value,
+			SensorType: "temperature",
+			Value:      req.Temperature,
 		})
 		if err != nil {
 			return err
 		}
 
-		readings[idx] = m
+		readings = append(readings, m)
+	}
+
+	if req.Humidity != 0 {
+		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
+			SensorType: "humidity",
+			Value:      req.Humidity,
+		})
+		if err != nil {
+			return err
+		}
+
+		readings = append(readings, m)
+	}
+
+	if req.LightLevel != 0 {
+		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
+			SensorType: "light",
+			Value:      req.LightLevel,
+		})
+		if err != nil {
+			return err
+		}
+
+		readings = append(readings, m)
+	}
+
+	if req.WaterLevel != 0 {
+		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
+			SensorType: "water",
+			Value:      req.WaterLevel,
+		})
+		if err != nil {
+			return err
+		}
+
+		readings = append(readings, m)
+	}
+
+	if req.SoilMoisture != 0 {
+		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
+			SensorType: "soil",
+			Value:      req.SoilMoisture,
+		})
+		if err != nil {
+			return err
+		}
+
+		readings = append(readings, m)
 	}
 
 	return c.JSON(http.StatusOK, sr.collection(readings))
