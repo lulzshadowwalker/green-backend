@@ -39,8 +39,9 @@ func main() {
 	if err := app.Start(); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("server shutdown", "err", err)
-		} else {
-			slog.Info("server crashed", "err", err)
+			return;
 		}
+
+        slog.Info("server crashed", "err", err)
 	}
 }

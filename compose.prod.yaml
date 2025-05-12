@@ -40,15 +40,19 @@ services:
       # - backend
       - proxy
 
-  #  adminer:
-  #    image: adminer:latest
-  #    restart: unless-stopped
-  #    ports:
-  #      - "8081:8080"
-  #    depends_on:
-  #      - db
-  #    networks:
-  #      - backend
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.green_adminer.rule=Host(`adminer.green.lulzie.online`)"
+      - "traefik.http.routers.green_adminer.entrypoints=websecure"
+      - "traefik.http.routers.green_admin.tls.certresolver=myresolver"
+    depends_on:
+      - db
+    networks:
+      # - backend
+      - proxy
   #
   #  loki:
   #    image: grafana/loki:2.9.3
@@ -73,17 +77,20 @@ services:
   #    networks:
   #      - loki
   #
-  #  grafana:
-  #    image: grafana/grafana:latest
-  #    user: "501"
-  #    volumes:
-  #      - ~/dev/docker-volumes/grafana:/var/lib/grafana
-  #    ports:
-  #      - "3000:3000"
-  #    restart: unless-stopped
-  #    networks:
-  #      - loki
-  #
+  grafana:
+    image: grafana/grafana:latest
+    user: "1000"
+    volumes:
+      - ~/volumes/grafana:/var/lib/grafana
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.green_grafana.rule=Host(`grafana.green.lulzie.online`)"
+      - "traefik.http.routers.green_grafana.entrypoints=websecure"
+      - "traefik.http.routers.green_grafana.tls.certresolver=myresolver"
+    networks:
+      - proxy
+
   watchtower:
     image: containrrr/watchtower
     command:
