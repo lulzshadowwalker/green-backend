@@ -2,7 +2,9 @@ package handler
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lulzshadowwalker/green-backend/internal"
@@ -27,10 +29,30 @@ func (sr *SensorReadings) RegisterRoutes(a *echo.Echo) {
 }
 
 func (sr *SensorReadings) Index(c echo.Context) error {
+	start := time.Now()
+	reqID := c.Response().Header().Get(echo.HeaderXRequestID)
+	slog.Info("SensorReadings Index request received",
+		"method", c.Request().Method,
+		"path", c.Path(),
+		"remote_addr", c.RealIP(),
+		"request_id", reqID,
+	)
+
 	m, err := sr.service.GetSensorReadings(c.Request().Context())
 	if err != nil {
+		slog.Error("Failed to get sensor readings",
+			"error", err,
+			"request_id", reqID,
+			"duration_ms", time.Since(start).Milliseconds(),
+		)
 		return err
 	}
+
+	slog.Info("Returning sensor readings",
+		"count", len(m),
+		"request_id", reqID,
+		"duration_ms", time.Since(start).Milliseconds(),
+	)
 
 	return c.JSON(http.StatusOK, sr.collection(m))
 }
@@ -44,17 +66,37 @@ type CreateSensorReadingRequest struct {
 }
 
 func (sr *SensorReadings) Create(c echo.Context) error {
+	start := time.Now()
+	reqID := c.Response().Header().Get(echo.HeaderXRequestID)
+	slog.Info("SensorReadings Create request received",
+		"method", c.Request().Method,
+		"path", c.Path(),
+		"remote_addr", c.RealIP(),
+		"request_id", reqID,
+	)
+
 	var req CreateSensorReadingRequest
 	if err := c.Bind(&req); err != nil {
+		slog.Error("Failed to bind request body",
+			"error", err,
+			"request_id", reqID,
+			"duration_ms", time.Since(start).Milliseconds(),
+		)
 		return err
 	}
 
 	if err := c.Validate(req); err != nil {
+		slog.Error("Validation failed for request body",
+			"error", err,
+			"request_id", reqID,
+			"duration_ms", time.Since(start).Milliseconds(),
+		)
 		return err
 	}
 
 	//  TODO: Move this into the service class with a transaction
 	readings := make([]internal.SensorReading, 0)
+	createdTypes := []string{}
 
 	if req.Temperature != 0 {
 		m, err := sr.service.CreateSensorReading(c.Request().Context(), internal.CreateSensorReadingParams{
@@ -62,10 +104,14 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 			Value:      req.Temperature,
 		})
 		if err != nil {
+			slog.Error("Failed to create temperature reading",
+				"error", err,
+				"request_id", reqID,
+			)
 			return err
 		}
-
 		readings = append(readings, m)
+		createdTypes = append(createdTypes, "temperature")
 	}
 
 	if req.Humidity != 0 {
@@ -74,10 +120,14 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 			Value:      req.Humidity,
 		})
 		if err != nil {
+			slog.Error("Failed to create humidity reading",
+				"error", err,
+				"request_id", reqID,
+			)
 			return err
 		}
-
 		readings = append(readings, m)
+		createdTypes = append(createdTypes, "humidity")
 	}
 
 	if req.LightLevel != 0 {
@@ -86,10 +136,14 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 			Value:      req.LightLevel,
 		})
 		if err != nil {
+			slog.Error("Failed to create light reading",
+				"error", err,
+				"request_id", reqID,
+			)
 			return err
 		}
-
 		readings = append(readings, m)
+		createdTypes = append(createdTypes, "light")
 	}
 
 	if req.WaterLevel != 0 {
@@ -98,10 +152,14 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 			Value:      req.WaterLevel,
 		})
 		if err != nil {
+			slog.Error("Failed to create water reading",
+				"error", err,
+				"request_id", reqID,
+			)
 			return err
 		}
-
 		readings = append(readings, m)
+		createdTypes = append(createdTypes, "water")
 	}
 
 	if req.SoilMoisture != 0 {
@@ -110,11 +168,22 @@ func (sr *SensorReadings) Create(c echo.Context) error {
 			Value:      req.SoilMoisture,
 		})
 		if err != nil {
+			slog.Error("Failed to create soil reading",
+				"error", err,
+				"request_id", reqID,
+			)
 			return err
 		}
-
 		readings = append(readings, m)
+		createdTypes = append(createdTypes, "soil")
 	}
+
+	slog.Info("Created sensor readings",
+		"types", createdTypes,
+		"count", len(readings),
+		"request_id", reqID,
+		"duration_ms", time.Since(start).Milliseconds(),
+	)
 
 	return c.JSON(http.StatusOK, sr.collection(readings))
 }
