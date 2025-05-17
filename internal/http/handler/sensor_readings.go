@@ -24,7 +24,7 @@ func NewSensorReadings(s SensorReadingsService) *SensorReadings {
 }
 
 func (sr *SensorReadings) RegisterRoutes(a *echo.Echo) {
-	a.GET("/api/loli", sr.Index)
+	a.GET("/api/readings", sr.Index)
 	a.POST("/api/readings", sr.Create)
 }
 
