@@ -56,8 +56,10 @@ func New(opts ...AppOption) (*App, error) {
 	h.RegisterRoutes(app.Echo)
 
 	handler.NewHealthHandler().RegisterRoutes(app.Echo)
-	var a interface{}
-	handler.NewControlHandler(a).RegisterRoutes(app.Echo)
+	// Wire up sensor controls store and service
+	controlStore := stores.NewSensorControls(db.New(app.db))
+	controlService := service.NewSensorControlsService(controlStore)
+	handler.NewControlHandler(controlService).RegisterRoutes(app.Echo)
 
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
