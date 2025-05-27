@@ -56,7 +56,8 @@ func New(opts ...AppOption) (*App, error) {
 	h.RegisterRoutes(app.Echo)
 
 	handler.NewHealthHandler().RegisterRoutes(app.Echo)
-	// Wire up sensor controls store and service
+	handler.NewThresholdHandler().RegisterRoutes(app.Echo)
+
 	controlStore := stores.NewSensorControls(db.New(app.db))
 	controlService := service.NewSensorControlsService(controlStore)
 	handler.NewControlHandler(controlService).RegisterRoutes(app.Echo)
@@ -130,7 +131,7 @@ func WithTimeout(d time.Duration) AppOption {
 }
 
 func (a *App) Close() {
-	//  TODO: cleanup database resources and whatnot
+	a.db.Close()
 }
 
 func (a *App) Addr() string {
