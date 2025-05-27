@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	application "github.com/lulzshadowwalker/green-backend/internal/http/app"
 	_ "github.com/lulzshadowwalker/green-backend/internal/logging"
@@ -34,14 +38,26 @@ func main() {
 
 	slog.Info("server started", "addr", app.Addr(), "timeout", app.Timeout())
 
-	//  TODO: Graceful termination
-	defer app.Close()
-	if err := app.Start(); err != nil {
-		if !errors.Is(err, http.ErrServerClosed) {
-			slog.Error("server shutdown", "err", err)
-			return;
-		}
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- app.Start()
+	}()
 
-        slog.Info("server crashed", "err", err)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-quit
+	slog.Info("shutdown signal received", "signal", sig.String())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := app.Echo.Shutdown(ctx); err != nil {
+		slog.Error("server forced to shutdown", "err", err)
+	}
+	app.Close()
+
+	err = <-serverErr
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		slog.Error("server shutdown", "err", err)
+		return
 	}
 }
