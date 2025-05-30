@@ -19,6 +19,11 @@ WHERE sensor_type = $1
 ORDER BY timestamp DESC
 LIMIT $4 OFFSET $5;
 
+-- name: GetSensorReadingsPastDays :many
+SELECT * from sensor_readings
+WHERE timestamp >= NOW() - INTERVAL '1 day' * $1
+ORDER BY timestamp DESC;
+
 -- name: GetSensorReadingsByTime :many
 SELECT * from sensor_readings
 WHERE timestamp >= $1

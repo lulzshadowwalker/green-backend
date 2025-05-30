@@ -28,7 +28,7 @@ func (sr *SensorReadings) toEntity(r db.SensorReading) internal.SensorReading {
 }
 
 func (sr *SensorReadings) GetSensorReadings(ctx context.Context) ([]internal.SensorReading, error) {
-	rows, err := sr.q.GetSensorReadings(ctx)
+	rows, err := sr.q.GetSensorReadingsPastDays(ctx, 7)
 	if err != nil {
 		return nil, err
 	}

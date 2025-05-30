@@ -210,3 +210,34 @@ func (q *Queries) GetSensorReadingsByTypeAndTime(ctx context.Context, arg GetSen
 	}
 	return items, nil
 }
+
+const getSensorReadingsPastDays = `-- name: GetSensorReadingsPastDays :many
+SELECT id, sensor_type, value, timestamp from sensor_readings
+WHERE timestamp >= NOW() - INTERVAL '1 day' * $1
+ORDER BY timestamp DESC
+`
+
+func (q *Queries) GetSensorReadingsPastDays(ctx context.Context, dollar_1 interface{}) ([]SensorReading, error) {
+	rows, err := q.db.Query(ctx, getSensorReadingsPastDays, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SensorReading
+	for rows.Next() {
+		var i SensorReading
+		if err := rows.Scan(
+			&i.ID,
+			&i.SensorType,
+			&i.Value,
+			&i.Timestamp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
