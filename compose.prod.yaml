@@ -8,6 +8,7 @@ services:
       - DB_PASSWORD=example
       - DB_NAME=mydb
       - DB_SSLMODE=disable
+      - JWT_SECRET=UuJyZbqrxWcYnGKEgTqRhG7TfdBToKs3kO4OxbHd3Gs=
     depends_on:
       - db
     networks:

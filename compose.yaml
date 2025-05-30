@@ -10,6 +10,7 @@ services:
       - DB_PASSWORD=example
       - DB_NAME=mydb
       - DB_SSLMODE=disable
+      - JWT_SECRET=UuJyZbqrxWcYnGKEgTqRhG7TfdBToKs3kO4OxbHd3Gs=
     volumes:
       - .:/app
     depends_on:

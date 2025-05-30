@@ -62,6 +62,10 @@ func New(opts ...AppOption) (*App, error) {
 	controlService := service.NewSensorControlsService(controlStore)
 	handler.NewControlHandler(controlService).RegisterRoutes(app.Echo)
 
+	userStore := stores.NewUsers(db.New(app.db))
+	userService := service.NewUserService(userStore)
+	handler.NewLoginHandler(userService).RegisterRoutes(app.Echo)
+
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Timeout: app.timeout,

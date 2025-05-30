@@ -25,3 +25,10 @@ type SensorReading struct {
 	Value      float64
 	Timestamp  pgtype.Timestamptz
 }
+
+type User struct {
+	ID           int32
+	Username     string
+	PasswordHash string
+	CreatedAt    pgtype.Timestamptz
+}
