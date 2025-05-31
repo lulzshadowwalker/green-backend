@@ -71,6 +71,8 @@ func New(opts ...AppOption) (*App, error) {
 		Timeout: app.timeout,
 	}))
 
+	e.Use(middleware.Logger())
+
 	e.Validator = NewGreenValidator()
 
 	e.HTTPErrorHandler = greenHTTPErrorHandler
