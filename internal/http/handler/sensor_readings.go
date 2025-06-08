@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lulzshadowwalker/green-backend/internal"
+	internalhttp "github.com/lulzshadowwalker/green-backend/internal/http"
 )
 
 type SensorReadings struct {
@@ -25,7 +26,7 @@ func NewSensorReadings(s SensorReadingsService) *SensorReadings {
 
 func (sr *SensorReadings) RegisterRoutes(a *echo.Echo) {
 	a.GET("/api/readings", sr.Index)
-	a.POST("/api/readings", sr.Create)
+	a.POST("/api/readings", internalhttp.JWTAuthMiddleware(sr.Create))
 }
 
 func (sr *SensorReadings) Index(c echo.Context) error {

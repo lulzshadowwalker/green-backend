@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lulzshadowwalker/green-backend/internal"
+	internalhttp "github.com/lulzshadowwalker/green-backend/internal/http"
 )
 
 type Control struct {
@@ -28,7 +29,7 @@ func NewControlHandler(c ControlService) *Control {
 
 func (c *Control) RegisterRoutes(e *echo.Echo) {
 	e.GET("/api/control", c.Index)
-	e.POST("/api/control", c.Set)
+	e.POST("/api/control", internalhttp.JWTAuthMiddleware(c.Set))
 }
 
 type setControlRequest struct {
