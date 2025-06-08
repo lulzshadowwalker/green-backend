@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"time"
+
 	"github.com/lulzshadowwalker/green-backend/internal"
 )
 
@@ -12,6 +14,7 @@ type SensorReadings struct {
 type SensorReadingsStore interface {
 	GetSensorReadings(ctx context.Context) ([]internal.SensorReading, error)
 	CreateSensorReading(ctx context.Context, params internal.CreateSensorReadingParams) (internal.SensorReading, error)
+	GetSensorReadingsSince(ctx context.Context, since time.Time) ([]internal.SensorReading, error)
 }
 
 func NewSensorReadings(r SensorReadingsStore) *SensorReadings {

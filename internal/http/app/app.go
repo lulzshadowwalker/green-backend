@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"os"
 	"regexp"
 	"time"
 
@@ -55,6 +56,11 @@ func New(opts ...AppOption) (*App, error) {
 	h := handler.NewSensorReadings(s)
 	h.RegisterRoutes(app.Echo)
 
+	// LLM Service and Handler
+	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+	llmService := service.NewLLMService(r, openaiAPIKey)
+	handler.NewLLMHandler(llmService).RegisterRoutes(app.Echo)
+
 	handler.NewHealthHandler().RegisterRoutes(app.Echo)
 	handler.NewThresholdHandler().RegisterRoutes(app.Echo)
 
@@ -68,7 +74,11 @@ func New(opts ...AppOption) (*App, error) {
 
 	//  NOTE: Middlewares should be added after all options are applied
 	e.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
-		Timeout: app.timeout,
+		Timeout:      60 * time.Second,
+		ErrorMessage: "Request timed out",
+		Skipper: func(c echo.Context) bool {
+			return c.Path() == "/api/llm/plant-advice"
+		},
 	}))
 
 	e.Use(middleware.Logger())

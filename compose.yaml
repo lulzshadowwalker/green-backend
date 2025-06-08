@@ -3,6 +3,8 @@ services:
     build:
       context: .
       target: dev
+    env_file:
+      - .env.local
     environment:
       - DB_HOST=db
       - DB_PORT=5432

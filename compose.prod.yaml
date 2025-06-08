@@ -1,6 +1,8 @@
 services:
   app:
     image: lulzshadowwalker/green-backend:prod
+    expose:
+      - .env.local
     environment:
       - DB_HOST=db
       - DB_PORT=5432
