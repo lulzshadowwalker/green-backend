@@ -49,7 +49,7 @@ func (s *llmService) StreamPlantAdvice(ctx context.Context, plant string, w io.W
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "You are an expert greenhouse assistant. Given the following sensor readings and plant type, provide actionable advice for optimal plant health. Be concise and practical.",
+				Content: "You are an expert greenhouse assistant. Given the following sensor readings and plant type, provide actionable advice for optimal plant health. Be concise and practical. Keep in mind, you are providing this advice to a simple farmer who is likely not to be very technical. Keep the language friendly and easy to understand without sacrificing accuracy. Also, keep in mind that you cannot use rich text formatting in your responses.",
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -64,8 +64,6 @@ func (s *llmService) StreamPlantAdvice(ctx context.Context, plant string, w io.W
 		return fmt.Errorf("failed to create OpenAI stream: %w", err)
 	}
 	defer stream.Close()
-
-
 
 	for {
 		response, err := stream.Recv()
@@ -87,8 +85,6 @@ func (s *llmService) StreamPlantAdvice(ctx context.Context, plant string, w io.W
 		}
 	}
 
-
-
 	return nil
 }
 
@@ -102,5 +98,3 @@ func buildPrompt(plant string, readings []internal.SensorReading) string {
 	b.WriteString("\nWhat advice do you have for optimal care of this plant, given these readings?")
 	return b.String()
 }
-
-
