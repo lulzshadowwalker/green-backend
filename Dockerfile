@@ -53,6 +53,9 @@ WORKDIR /
 # Copy the passwd file
 COPY --from=build-production /etc/passwd /etc/passwd
 
+# Copy CA certificates for SSL connections
+COPY --from=build-production /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
 # Copy the app binary from the build stage
 COPY --from=build-production /app/http http
 

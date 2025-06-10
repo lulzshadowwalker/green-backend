@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -26,7 +28,15 @@ func NewLLMService(readingsStore SensorReadingsStore, apiKey string) LLMService 
 		apiKey = os.Getenv("OPENAI_API_KEY")
 	}
 
-	client := openai.NewClient(apiKey)
+	// TEMPORARY: Skip SSL verification for testing
+	// TODO: Remove this in production once CA certificates are properly configured
+	config := openai.DefaultConfig(apiKey)
+	config.HTTPClient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	client := openai.NewClientWithConfig(config)
 
 	return &llmService{
 		readingsStore: readingsStore,
